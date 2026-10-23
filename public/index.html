@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gym Challenge</title>
+<meta name="theme-color" content="#0b0b0f">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0b0f; --card:#15151c; --card2:#1d1d26; --line:#2a2a36; --text:#f4f4f6; --muted:#8e8fa1;
+    --a:#ff5e3a; --b:#2ec4b6; --gold:#ffd166; --ok:#55e07a; --bad:#ff4d6d;
+    --r:18px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  body{min-height:100dvh;padding-bottom:env(safe-area-inset-bottom)}
+  h1,h2,h3,.disp{font-family:'Bebas Neue',Inter,sans-serif;letter-spacing:.02em;font-weight:400;margin:0}
+  .wrap{max-width:720px;margin:0 auto;padding:16px}
+  .hide{display:none!important}
+  button{font:inherit;cursor:pointer;border:0;border-radius:14px}
+  .btn{background:var(--text);color:#000;font-weight:800;padding:16px 20px;width:100%;font-size:17px}
+  .btn:disabled{opacity:.5;cursor:default}
+  .btn.ghost{background:transparent;color:var(--muted);border:1px solid var(--line);font-weight:600}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+  .muted{color:var(--muted)}
+  .row{display:flex;gap:10px;align-items:center}
+  .grow{flex:1}
+
+  /* login */
+  #login{min-height:100dvh;display:flex;flex-direction:column;justify-content:center}
+  #login h1{font-size:64px;line-height:.9}
+  #login h1 span{color:var(--a)}
+  .avatars{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:22px 0}
+  .avatar{background:var(--card);border:2px solid var(--line);border-radius:var(--r);padding:18px 14px;text-align:left;color:var(--text)}
+  .avatar.sel{border-color:var(--text)}
+  .avatar .nm{font-size:26px;font-family:'Bebas Neue';line-height:1}
+  .avatar .tm{font-size:12px;color:var(--muted);margin-top:4px}
+  .avatar.admin{grid-column:1/-1;text-align:center}
+  .pin{width:100%;font:inherit;font-size:28px;letter-spacing:.4em;text-align:center;padding:14px;border-radius:14px;border:1px solid var(--line);background:var(--card2);color:var(--text);outline:none}
+  .pin:focus{border-color:var(--text)}
+  .err{color:var(--bad);font-weight:600;min-height:20px;margin:8px 0;font-size:14px}
+
+  /* app header */
+  header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:14px}
+  header h1{font-size:44px;line-height:.9}
+  header .sub{color:var(--muted);font-size:13px;margin-top:4px}
+  .pill{display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:800;background:var(--card2);border:1px solid var(--line)}
+
+  /* banner */
+  .banner{border-radius:var(--r);padding:14px 16px;font-weight:800;font-size:15px;margin-bottom:14px;border:1px solid var(--line);background:linear-gradient(135deg,#1b1b25,#101016)}
+  .banner b{color:var(--gold)}
+
+  /* scoreboard */
+  .score{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:stretch;margin-bottom:14px}
+  .team{border-radius:var(--r);padding:14px;position:relative;overflow:hidden;background:var(--card);border:1px solid var(--line)}
+  .team.lead{box-shadow:0 0 0 2px var(--c) inset}
+  .team .bar{position:absolute;left:0;top:0;height:5px;width:100%;background:var(--c)}
+  .team .name{font-family:'Bebas Neue';font-size:22px;color:var(--c);line-height:1;margin-top:4px}
+  .team .pts{font-family:'Bebas Neue';font-size:72px;line-height:.9;margin:8px 0 2px}
+  .team .pts small{font-size:18px;color:var(--muted);letter-spacing:.05em}
+  .team .meta{font-size:12px;color:var(--muted);line-height:1.6}
+  .team .meta b{color:var(--text)}
+  .vs{display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue';font-size:30px;color:var(--muted)}
+  .crown{position:absolute;right:12px;top:12px;font-size:20px}
+  .members{margin-top:10px;display:flex;flex-direction:column;gap:6px}
+  .mem{display:flex;justify-content:space-between;font-size:13px;background:var(--card2);padding:7px 10px;border-radius:10px}
+  .mem .st{font-weight:800}
+  .mem .st.ok{color:var(--ok)} .mem .st.wait{color:var(--muted)}
+
+  /* today */
+  .today{margin-bottom:14px}
+  .today h2{font-size:28px;margin-bottom:6px}
+  .today p{margin:0 0 12px;color:var(--muted);font-size:14px;line-height:1.5}
+  .upl{display:flex;flex-direction:column;gap:10px}
+  .preview{width:100%;max-height:320px;object-fit:cover;border-radius:14px;display:none}
+  .done{display:flex;gap:12px;align-items:center}
+  .done img{width:72px;height:72px;border-radius:12px;object-fit:cover}
+  .done .t{font-weight:800}
+  .done .t span{display:block;color:var(--muted);font-weight:400;font-size:13px;margin-top:3px}
+
+  /* calendar */
+  .cal{margin-bottom:14px}
+  .cal h2{font-size:28px;margin-bottom:10px}
+  .cal .legend{font-size:12px;color:var(--muted);margin-bottom:8px;display:flex;gap:12px;flex-wrap:wrap}
+  .dot{display:inline-block;width:10px;height:10px;border-radius:3px;vertical-align:middle;margin-right:4px}
+  .grid{display:grid;grid-template-columns:repeat(10,1fr);gap:5px}
+  .day{aspect-ratio:1;border-radius:7px;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:var(--muted);position:relative}
+  .day.ok{background:var(--c);color:#000}
+  .day.half{background:linear-gradient(135deg,var(--c) 50%,var(--card2) 50%);color:var(--text)}
+  .day.miss{background:#3a1a22;color:var(--bad)}
+  .day.today{outline:2px solid var(--text)}
+  .day.bonus::after{content:'+3';position:absolute;bottom:-6px;right:-3px;font-size:9px;background:var(--gold);color:#000;border-radius:6px;padding:0 3px}
+  .teamcal{margin-bottom:12px;--c:var(--a)}
+  .teamcal .tn{font-family:'Bebas Neue';font-size:18px;color:var(--c);margin-bottom:6px;display:flex;justify-content:space-between}
+  .teamcal .tn span{font-family:Inter;font-size:12px;color:var(--muted)}
+
+  /* shame */
+  .shame{margin-bottom:14px}
+  .shame h2{font-size:28px;margin-bottom:8px}
+  .shame ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px}
+  .shame li{background:var(--card2);padding:10px 12px;border-radius:10px;font-size:13px;display:flex;justify-content:space-between}
+  .shame li b{color:var(--bad)}
+
+  /* feed */
+  .feed h2{font-size:28px;margin-bottom:10px}
+  .photos{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+  .ph{position:relative;aspect-ratio:1;border-radius:12px;overflow:hidden;background:var(--card2)}
+  .ph img{width:100%;height:100%;object-fit:cover;display:block}
+  .ph .tag{position:absolute;left:6px;bottom:6px;right:6px;font-size:11px;font-weight:800;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);padding:4px 7px;border-radius:8px;display:flex;justify-content:space-between}
+  .ph .tag i{font-style:normal;color:var(--muted);font-weight:600}
+  .ph.a .tag{border-left:3px solid var(--a)} .ph.b .tag{border-left:3px solid var(--b)}
+
+  /* admin */
+  .admin h2{font-size:28px;margin:18px 0 8px}
+  table{width:100%;border-collapse:collapse;font-size:12px}
+  th,td{padding:6px 4px;border-bottom:1px solid var(--line);text-align:center;white-space:nowrap}
+  th:first-child,td:first-child{text-align:left}
+  td.y{color:var(--ok)} td.n{color:var(--bad)}
+  .tabs{display:flex;gap:8px;margin-bottom:12px}
+  .tabs button{padding:8px 14px;border-radius:999px;background:var(--card2);color:var(--muted);font-weight:800;font-size:13px;border:1px solid var(--line)}
+  .tabs button.on{background:var(--text);color:#000}
+
+  /* lightbox */
+  #lb{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;flex-direction:column;z-index:50;padding:16px}
+  #lb img{max-width:100%;max-height:80vh;border-radius:12px}
+  #lb .cap{margin-top:10px;font-weight:800}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--text);color:#000;font-weight:800;padding:12px 18px;border-radius:999px;z-index:60;display:none;max-width:90vw;text-align:center}
+  footer{margin:24px 0 8px;text-align:center}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<section id="login" class="wrap">
+  <h1>NOVEMBER<br><span>GYM</span> CHALLENGE</h1>
+  <p class="muted" style="margin:10px 0 0">Who are you?</p>
+  <div class="avatars" id="avatars"></div>
+  <div id="pinbox" class="hide">
+    <input id="pin" class="pin" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="PIN" autocomplete="off">
+    <div class="err" id="loginErr"></div>
+    <button class="btn" id="loginBtn">Let's go</button>
+  </div>
+</section>
+
+<!-- APP -->
+<section id="app" class="wrap hide">
+  <header>
+    <div>
+      <h1 id="title">GYM CHALLENGE</h1>
+      <div class="sub" id="subtitle"></div>
+    </div>
+    <div style="text-align:right">
+      <span class="pill" id="daysLeft"></span><br>
+      <button class="btn ghost" id="logout" style="width:auto;padding:6px 10px;font-size:12px;margin-top:6px">Log out</button>
+    </div>
+  </header>
+
+  <div class="banner" id="banner"></div>
+
+  <div class="score" id="score"></div>
+
+  <div class="card today" id="today"></div>
+
+  <div class="card cal" id="cal"></div>
+
+  <div class="card shame" id="shame"></div>
+
+  <div class="card feed">
+    <h2>Proof wall</h2>
+    <div class="photos" id="photos"></div>
+  </div>
+
+  <div class="card admin hide" id="admin"></div>
+
+  <footer class="muted" style="font-size:12px">Both teammates must upload before 23:59 (their own local time). Submissions are final. 7 days in a row = +3 bonus.</footer>
+</section>
+
+<div id="lb" onclick="this.style.display='none'"><img id="lbimg" alt=""><div class="cap" id="lbcap"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = (s) => document.querySelector(s);
+const USERS_LOGIN = [
+  { id:'shawn', name:'Shawn', team:'Creative Crushers' },
+  { id:'genesis', name:'Genesis', team:'Creative Crushers' },
+  { id:'donna', name:'Donna', team:'Support Squad' },
+  { id:'aaron', name:'Aaron', team:'Support Squad' },
+  { id:'niels', name:'Niels', team:'Admin', admin:true },
+];
+let selected = null, state = null;
+
+function toast(msg, ms = 2600) { const t = $('#toast'); t.textContent = msg; t.style.display = 'block'; clearTimeout(t._t); t._t = setTimeout(() => t.style.display = 'none', ms); }
+function todayLocal() { const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); }
+function fmt(ymd) { const d = new Date(ymd + 'T00:00:00'); return d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }); }
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+
+// ---------- login ----------
+function renderLogin() {
+  $('#avatars').innerHTML = USERS_LOGIN.map(u => `<button class="avatar ${u.admin ? 'admin' : ''}" data-id="${u.id}"><div class="nm">${u.name}</div><div class="tm">${u.team}</div></button>`).join('');
+  document.querySelectorAll('.avatar').forEach(b => b.onclick = () => {
+    selected = b.dataset.id;
+    document.querySelectorAll('.avatar').forEach(x => x.classList.toggle('sel', x === b));
+    $('#pinbox').classList.remove('hide'); $('#pin').focus();
+  });
+  $('#loginBtn').onclick = login;
+  $('#pin').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+}
+async function login() {
+  $('#loginErr').textContent = '';
+  const r = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user: selected, pin: $('#pin').value }) });
+  const j = await r.json();
+  if (!r.ok) { $('#loginErr').textContent = j.error || 'Login failed'; return; }
+  $('#pin').value = '';
+  enterApp();
+}
+$('#logout').onclick = async () => { await fetch('/api/logout', { method: 'POST' }); location.reload(); };
+
+// ---------- app ----------
+async function load() {
+  const r = await fetch('/api/state?today=' + todayLocal());
+  if (r.status === 401) { $('#app').classList.add('hide'); $('#login').classList.remove('hide'); return false; }
+  state = await r.json();
+  render();
+  return true;
+}
+async function enterApp() {
+  if (await load()) { $('#login').classList.add('hide'); $('#app').classList.remove('hide'); }
+}
+
+function render() {
+  const s = state, me = s.me;
+  const myTeam = s.teams.find(t => t.id === me.team);
+  $('#subtitle').textContent = `${fmt(s.challenge.start)} → ${fmt(s.challenge.end)} · Hi ${me.name}`;
+  $('#daysLeft').textContent = s.finished ? 'FINISHED' : s.started ? `${s.daysLeft} day${s.daysLeft === 1 ? '' : 's'} left` : `Starts ${fmt(s.challenge.start)}`;
+
+  // banner
+  const [A, B] = s.teams;
+  let bannerHtml;
+  if (s.finished) {
+    const w = s.leader ? s.teams.find(t => t.id === s.leader) : null;
+    bannerHtml = w ? `🏆 <b>${esc(w.name)}</b> win the challenge! ${esc(s.challenge.prize)}.` : `🤝 It's a dead heat. Niels decides.`;
+  } else if (!s.leader) {
+    bannerHtml = `⚔️ All square at <b>${A.total}–${B.total}</b>. First team to miss a day loses the lead.`;
+  } else {
+    const L = s.teams.find(t => t.id === s.leader), T = s.teams.find(t => t.id !== s.leader);
+    const flip = s.gap <= 3 ? ` One streak bonus flips it.` : s.gap <= 2 ? ` One missed day and it's over.` : '';
+    bannerHtml = `🔥 <b>${esc(L.name)}</b> lead by <b>${s.gap}</b>.${flip} ${esc(T.name)}: ${T.toNextBonus} more day${T.toNextBonus === 1 ? '' : 's'} to your +3.`;
+  }
+  $('#banner').innerHTML = bannerHtml;
+
+  // scoreboard
+  $('#score').innerHTML = s.teams.map((t, i) => `
+    <div class="team ${s.leader === t.id ? 'lead' : ''}" style="--c:${t.color}">
+      <div class="bar"></div>
+      ${s.leader === t.id ? '<div class="crown">👑</div>' : ''}
+      <div class="name">${esc(t.name)}</div>
+      <div class="pts">${t.total}<small> PTS</small></div>
+      <div class="meta">${t.points} days + ${t.bonus} bonus<br>🔥 streak <b>${t.currentStreak}</b> · best <b>${t.longestStreak}</b><br>next +3 in <b>${t.toNextBonus}</b></div>
+      <div class="members">${t.members.map(m => `<div class="mem"><span>${esc(m.name)} <span class="muted">${m.uploads}</span></span><span class="st ${m.today ? 'ok' : 'wait'}">${m.today ? '✓ today' : 'not yet'}</span></div>`).join('')}
+      </div>
+    </div>`).map((h, i) => i === 1 ? '<div class="vs">VS</div>' + h : h).join('');
+
+  // today
+  renderToday();
+
+  // calendars
+  $('#cal').innerHTML = `<h2>The month</h2>
+    <div class="legend"><span><span class="dot" style="background:var(--a)"></span>point</span><span><span class="dot" style="background:linear-gradient(135deg,var(--a) 50%,var(--card2) 50%)"></span>only one uploaded</span><span><span class="dot" style="background:#3a1a22"></span>missed</span><span><span class="dot" style="background:var(--gold)"></span>streak bonus</span></div>
+    ${s.teams.map(t => `<div class="teamcal" style="--c:${t.color}"><div class="tn">${esc(t.name)} <span>${t.points} scored days</span></div><div class="grid">${t.days.map(d => {
+      const n = Object.values(d.uploads).filter(Boolean).length;
+      let cls = d.scored ? 'ok' : n ? 'half' : (d.date < s.today ? 'miss' : '');
+      if (!d.scored && d.date === s.today && n === 0) cls = '';
+      return `<div class="day ${cls} ${d.today ? 'today' : ''} ${d.bonus ? 'bonus' : ''}" title="${d.date}">${Number(d.date.slice(8))}</div>`;
+    }).join('')}</div></div>`).join('')}`;
+
+  // hall of shame
+  const shame = s.teams.flatMap(t => t.missed.map(m => ({ ...m, team: t })));
+  shame.sort((a, b) => b.date.localeCompare(a.date));
+  $('#shame').innerHTML = `<h2>Hall of shame</h2>` + (shame.length
+    ? `<ul>${shame.slice(0, 15).map(m => `<li><span>${fmt(m.date)} · <span style="color:${m.team.color}">${esc(m.team.name)}</span></span><span><b>${esc(m.slackers.join(' & '))}</b> let the team down</span></li>`).join('')}</ul>`
+    : `<p class="muted" style="margin:0;font-size:14px">Nobody has let their teammate down yet. Keep it that way.</p>`);
+
+  // feed
+  $('#photos').innerHTML = s.feed.length ? s.feed.map(p => `<div class="ph ${p.team}" data-url="${p.url}" data-cap="${esc(p.name)} · ${fmt(p.date)}"><img src="${p.url}" loading="lazy" alt=""><div class="tag"><span>${esc(p.name)}</span><i>${p.date.slice(8)}/${p.date.slice(5, 7)}</i></div></div>`).join('')
+    : `<p class="muted" style="grid-column:1/-1;font-size:14px;margin:0">No proof yet. Be the first.</p>`;
+  document.querySelectorAll('.ph').forEach(el => el.onclick = () => { $('#lbimg').src = el.dataset.url; $('#lbcap').textContent = el.dataset.cap; $('#lb').style.display = 'flex'; });
+
+  // admin
+  if (me.admin) renderAdmin(); else $('#admin').classList.add('hide');
+}
+
+function renderToday() {
+  const s = state, me = s.me, box = $('#today');
+  if (me.admin) { box.innerHTML = `<h2>Admin view</h2><p>You're watching, not sweating. The full matrix is at the bottom.</p>`; return; }
+  const t = s.teams.find(x => x.id === me.team);
+  const mine = t.members.find(m => m.id === me.id), mate = t.members.find(m => m.id !== me.id);
+  const myPhoto = s.feed.find(p => p.user === me.id && p.date === s.today);
+  if (myPhoto) {
+    box.innerHTML = `<h2>Today ✓</h2><div class="done"><img src="${myPhoto.url}" alt=""><div class="t">You're in. ${mate.today ? `${esc(mate.name)} too — point secured! 🔥` : `Now chase <b>${esc(mate.name)}</b>.`}<span>${fmt(s.today)} · locked in, can't be changed</span></div></div>`;
+    return;
+  }
+  const deadline = `Deadline 23:59 your time.`;
+  box.innerHTML = `<h2>Today: ${fmt(s.today)}</h2>
+    <p>${mate.today ? `<b style="color:var(--ok)">${esc(mate.name)} already uploaded.</b> Don't be the reason you lose the point.` : `${esc(mate.name)} hasn't uploaded yet either. Go first and push them.`} ${deadline}</p>
+    <div class="upl">
+      <img class="preview" id="preview" alt="">
+      <input type="file" id="file" accept="image/*" capture="environment" class="hide">
+      <button class="btn" id="pick">📸 Upload today's workout photo</button>
+      <button class="btn" id="send" style="display:none;background:var(--ok)">Submit — this is final</button>
+      <button class="btn ghost" id="retake" style="display:none">Choose another</button>
+    </div>`;
+  const file = $('#file'), prev = $('#preview');
+  $('#pick').onclick = () => file.click();
+  $('#retake').onclick = () => { file.value = ''; prev.style.display = 'none'; $('#send').style.display = 'none'; $('#retake').style.display = 'none'; $('#pick').style.display = ''; };
+  let blob = null;
+  file.onchange = async () => {
+    const f = file.files[0]; if (!f) return;
+    $('#pick').disabled = true; $('#pick').textContent = 'Preparing…';
+    try { blob = await toJpeg(f, 1400, 0.82); } catch (e) { toast('Could not read that image'); $('#pick').disabled = false; $('#pick').textContent = '📸 Upload today\'s workout photo'; return; }
+    prev.src = URL.createObjectURL(blob); prev.style.display = 'block';
+    $('#pick').style.display = 'none'; $('#pick').disabled = false; $('#pick').textContent = '📸 Upload today\'s workout photo';
+    $('#send').style.display = ''; $('#retake').style.display = '';
+  };
+  $('#send').onclick = async () => {
+    if (!blob) return;
+    if (!confirm('Submit this photo for ' + fmt(s.today) + '? It cannot be changed or deleted afterwards.')) return;
+    $('#send').disabled = true; $('#send').textContent = 'Uploading…';
+    const r = await fetch('/api/upload', { method: 'POST', headers: { 'Content-Type': 'application/octet-stream', 'X-Date': s.today, 'X-Tz': String(new Date().getTimezoneOffset()) }, body: blob });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) { toast(j.error || 'Upload failed', 4000); $('#send').disabled = false; $('#send').textContent = 'Submit — this is final'; return; }
+    toast('Locked in 💪');
+    await load();
+  };
+}
+
+function toJpeg(file, max, q) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const sc = Math.min(1, max / Math.max(img.width, img.height));
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.width * sc); c.height = Math.round(img.height * sc);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      c.toBlob(b => b ? resolve(b) : reject(new Error('encode')), 'image/jpeg', q);
+      URL.revokeObjectURL(url);
+    };
+    img.onerror = reject;
+    img.src = url;
+  });
+}
+
+function renderAdmin() {
+  const s = state, box = $('#admin');
+  box.classList.remove('hide');
+  const users = s.teams.flatMap(t => t.members.map(m => ({ ...m, color: t.color })));
+  const days = s.teams[0].days.map(d => d.date);
+  box.innerHTML = `<h2>Admin overview</h2>
+    <div class="muted" style="font-size:13px;margin-bottom:10px">${s.teams.map(t => `<span style="color:${t.color}">${esc(t.name)}</span>: ${t.total} pts (${t.points} days, ${t.bonus} bonus, streak ${t.currentStreak}, best ${t.longestStreak})`).join(' · ')}</div>
+    <div style="overflow:auto"><table><thead><tr><th>Day</th>${users.map(u => `<th style="color:${u.color}">${esc(u.name)}</th>`).join('')}<th>A</th><th>B</th></tr></thead><tbody>
+    ${days.map((d, i) => {
+      const row = users.map(u => { const p = s.feed.find(x => x.user === u.id && x.date === d); return p ? `<td class="y"><a href="${p.url}" target="_blank" style="color:inherit">✓ ${new Date(p.uploadedAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</a></td>` : `<td class="${d < s.today ? 'n' : ''}">${d < s.today ? '✗' : '–'}</td>`; }).join('');
+      const pa = s.teams[0].days[i], pb = s.teams[1].days[i];
+      return `<tr><td>${d.slice(5)}</td>${row}<td>${pa.scored ? (pa.bonus ? '1+3' : '1') : ''}</td><td>${pb.scored ? (pb.bonus ? '1+3' : '1') : ''}</td></tr>`;
+    }).join('')}</tbody></table></div>
+    <p class="muted" style="font-size:12px">Times shown in your local time. Days before the challenge start are not scored, even if photos were uploaded.</p>`;
+}
+
+renderLogin();
+load();
+</script>
+</body>
+</html>
