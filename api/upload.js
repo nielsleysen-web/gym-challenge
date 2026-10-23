@@ -31,10 +31,9 @@ export default async function handler(req, res) {
   if (existing.blobs.length) return json(res, 409, { error: 'Already uploaded today — one photo per day, and it cannot be changed.' });
 
   const blob = await put(`${prefix}-${Date.now().toString(36)}.jpg`, buf, {
-    access: 'public',
+    access: 'private',
     contentType: 'image/jpeg',
     addRandomSuffix: true,
-    cacheControlMaxAge: 60 * 60 * 24 * 365,
   });
-  return json(res, 200, { ok: true, url: blob.url, date });
+  return json(res, 200, { ok: true, pathname: blob.pathname, date });
 }

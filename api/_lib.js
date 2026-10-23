@@ -83,7 +83,7 @@ export const isYmd = (s) => /^\d{4}-\d{2}-\d{2}$/.test(s);
 export function parseEntry(blob) {
   const m = blob.pathname.match(/^subs\/([a-z]+)\/(\d{4}-\d{2}-\d{2})(?:-[^/]*)?\.jpe?g$/);
   if (!m || !USERS[m[1]] || USERS[m[1]].admin) return null;
-  return { user: m[1], date: m[2], url: blob.url, uploadedAt: blob.uploadedAt, size: blob.size };
+  return { user: m[1], date: m[2], url: '/api/photo?p=' + encodeURIComponent(blob.pathname), uploadedAt: blob.uploadedAt, size: blob.size };
 }
 
 // ---------- Scoring ----------
